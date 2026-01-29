@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import Image from 'next/image';
+import Link from 'next/link';
 import InteractionButtons from './interaction-buttons';
 import { logInteraction } from '@/app/actions';
 import { headers } from 'next/headers';
@@ -100,9 +101,9 @@ export default async function PublicQRPage({ params }: { params: Promise<{ carId
       </p>
 
       <div className="mt-6 text-xs text-gray-400">
-        <a href="/safety" className="underline">
+        <Link href="/safety" className="underline">
           Safety Notice
-        </a>
+        </Link>
       </div>
     </div>
   );
