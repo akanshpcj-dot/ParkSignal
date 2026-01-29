@@ -198,16 +198,25 @@ export async function updateUser(userId: string, formData: FormData) {
 
   const email = formData.get('email') as string;
   const role = formData.get('role') as string;
+  const password = formData.get('password') as string;
 
   if (!email || !role) {
     return { error: 'Missing required fields' };
   }
 
   try {
-    await db.execute({
-      sql: "UPDATE users SET email = ?, role = ? WHERE id = ?",
-      args: [email, role, userId],
-    });
+    if (password && password.trim() !== '') {
+      const passwordHash = await hashPassword(password);
+      await db.execute({
+        sql: "UPDATE users SET email = ?, role = ?, password_hash = ? WHERE id = ?",
+        args: [email, role, passwordHash, userId],
+      });
+    } else {
+      await db.execute({
+        sql: "UPDATE users SET email = ?, role = ? WHERE id = ?",
+        args: [email, role, userId],
+      });
+    }
 
     revalidatePath('/dashboard/users');
     return { success: true };

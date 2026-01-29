@@ -15,7 +15,7 @@ export default async function PublicQRPage({ params }: { params: Promise<{ carId
   // We use logInteraction instead of direct update to ensure consistent logging
   // and to avoid double counting if logInteraction also increments the counter.
   // Note: logInteraction is async, but we don't await it to avoid blocking render (fire & forget pattern)
-  logInteraction(carId, 'scan', { userAgent }).catch(err => console.error('Failed to log scan', err));
+  // MOVED: logInteraction is now called after verifying car exists to prevent FK constraint errors
 
   const result = await db.execute({
     sql: "SELECT * FROM cars WHERE id = ?",
@@ -41,6 +41,9 @@ export default async function PublicQRPage({ params }: { params: Promise<{ carId
       </div>
     );
   }
+
+  // Only log interaction if car exists
+  logInteraction(carId, 'scan', { userAgent }).catch(err => console.error('Failed to log scan', err));
 
   // 7️⃣ Disabled / Inactive QR State
   if (!car.is_active) {

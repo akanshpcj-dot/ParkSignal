@@ -25,6 +25,7 @@ export default function UsersClient({ users }: { users: User[] }) {
   // Edit User Form State
   const [editUserEmail, setEditUserEmail] = useState('');
   const [editUserRole, setEditUserRole] = useState('');
+  const [editUserPassword, setEditUserPassword] = useState('');
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +59,9 @@ export default function UsersClient({ users }: { users: User[] }) {
     const formData = new FormData();
     formData.append('email', editUserEmail);
     formData.append('role', editUserRole);
+    if (editUserPassword) {
+      formData.append('password', editUserPassword);
+    }
 
     const result = await updateUser(editingUser.id, formData);
     
@@ -94,6 +98,7 @@ export default function UsersClient({ users }: { users: User[] }) {
     setEditingUser(user);
     setEditUserEmail(user.email);
     setEditUserRole(user.role || 'owner');
+    setEditUserPassword('');
   };
 
   return (
@@ -150,7 +155,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                       {user.role === 'superadmin' ? 'Superadmin' : 'Owner'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" suppressHydrationWarning>
                     {new Date(user.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -209,6 +214,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
                 <input
@@ -271,6 +277,16 @@ export default function UsersClient({ users }: { users: User[] }) {
                   onChange={(e) => setEditUserEmail(e.target.value)}
                   className="mt-1 block w-full rounded-md border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white px-3 py-2 text-sm"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                <input
+                  type="password"
+                  value={editUserPassword}
+                  onChange={(e) => setEditUserPassword(e.target.value)}
+                  placeholder="Leave blank to keep current password"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white px-3 py-2 text-sm"
                 />
               </div>
               <div>

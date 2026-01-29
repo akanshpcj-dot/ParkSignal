@@ -2,6 +2,7 @@
 
 import { logInteraction } from '@/app/actions';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 interface InteractionButtonsProps {
   carId: string;
@@ -16,6 +17,16 @@ export default function InteractionButtons({
   whatsappEnabled, 
   whatsappMessage 
 }: InteractionButtonsProps) {
+  const [expired, setExpired] = useState(false);
+  const [firstInteractedAt, setFirstInteractedAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!firstInteractedAt || expired) return;
+    const EXPIRY_MS = 60000;
+    const remaining = Math.max(0, EXPIRY_MS - (Date.now() - firstInteractedAt));
+    const t = setTimeout(() => setExpired(true), remaining);
+    return () => clearTimeout(t);
+  }, [firstInteractedAt, expired]);
 
   const handleInteraction = async (type: 'call' | 'whatsapp') => {
     let locationData = {};
@@ -59,13 +70,29 @@ export default function InteractionButtons({
   const handleCall = () => {
     triggerHaptic();
     handleInteraction('call');
+    setFirstInteractedAt((t) => t ?? Date.now());
     // Allow default behavior (href navigation) to proceed
   };
 
   const handleWhatsapp = () => {
     triggerHaptic();
     handleInteraction('whatsapp');
+    setFirstInteractedAt((t) => t ?? Date.now());
   };
+
+  if (expired) {
+    return (
+      <div className="w-full max-w-sm p-8 bg-gray-50 rounded-xl border border-gray-200 text-center shadow-sm">
+        <div className="mb-4 flex justify-center">
+          <svg className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <p className="text-gray-900 font-bold text-xl mb-3">Session Ended</p>
+        <p className="text-gray-600">Scan QR code on the vehicle to contact Owner of the vehicle</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col items-center space-y-4">
